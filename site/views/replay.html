@@ -1,0 +1,29 @@
+<section class="view" id="view-replay">
+  <header>
+    <h2><span class="en">The last test run, replayed</span><span class="ru">Последний прогон тестов, шаг за шагом</span></h2>
+    <p class="lead">
+      <span class="en">Every check is one sentence. Open a check to see the steps it took and the numbers it measured in kilowatt-hours — because on this project the number is the finding, and the green tick is only its summary.</span>
+      <span class="ru">Каждая проверка — одно предложение. Откройте её, чтобы увидеть шаги и измеренные числа в киловатт-часах: здесь число и есть вывод, а зелёная галочка — лишь его итог.</span>
+    </p>
+  </header>
+
+  <section>
+    <h3><span class="en">The same controller, three kinds of wallbox</span><span class="ru">Один контроллер, три вида вольтбокса</span></h3>
+    <div class="linkcards" id="replay-links"></div>
+    <p class="small muted">
+      <span class="en">The behaviour of the control law does not depend on the wire its number travels down, so those checks run once, against the model. The driver checks run everywhere, and one of them replays a whole day through all three and compares them decision by decision.</span>
+      <span class="ru">Поведение закона управления не зависит от провода, по которому идёт число, поэтому такие проверки выполняются один раз — против модели. Проверки драйверов идут везде, и одна из них проигрывает целый день через все три и сверяет решения.</span>
+    </p>
+  </section>
+
+  <section>
+    <div class="row" style="justify-content: space-between">
+      <h3><span class="en">All checks by topic</span><span class="ru">Все проверки по темам</span></h3>
+      <input class="search" id="replay-search" type="search" autocomplete="off" aria-label="Search checks" />
+    </div>
+    <div id="replay-suites"></div>
+    <p class="muted" id="replay-none" hidden>
+      <span class="en">No check matches the search.</span><span class="ru">По запросу ничего не найдено.</span>
+    </p>
+  </section>
+</section>

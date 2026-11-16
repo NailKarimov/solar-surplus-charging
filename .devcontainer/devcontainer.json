@@ -1,0 +1,10 @@
+{
+  "name": "solar-surplus-charging",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "postCreateCommand": "pip install -e '.[dev,pages]' && python -m playwright install --with-deps chromium",
+  "customizations": {
+    "codespaces": {
+      "openFiles": ["README.md"]
+    }
+  }
+}

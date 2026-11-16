@@ -1,0 +1,138 @@
+<section class="view" id="view-live">
+  <h2><span class="en">The live house</span><span class="ru">Живой дом</span></h2>
+  <p class="lead">
+    <span class="en"
+      >This is the controller the tests run against, rewritten for the browser and compared with the original
+      decision by decision. Send a cloud over the roof, put the kettle on, unplug the car, cut the meter — and then
+      plant one of the bugs from the bug hunt and watch the matching check turn red.</span
+    >
+    <span class="ru"
+      >Это тот же контроллер, против которого идут тесты, переписанный для браузера и сверенный с оригиналом решение
+      за решением. Пустите облако над крышей, включите чайник, отключите машину, оборвите счётчик — а потом посадите
+      один из багов и смотрите, как краснеет соответствующая проверка.</span
+    >
+  </p>
+
+  <div class="live">
+    <div>
+      <div class="scene" id="live-scene"></div>
+
+      <div class="card" style="margin-top: 12px">
+        <div class="statebar">
+          <span class="led" id="live-led"></span>
+          <strong id="live-state"></strong>
+          <span class="pill" id="live-phases"></span>
+        </div>
+        <div class="readouts">
+          <div class="readout">
+            <div class="k"><span class="en">The meter at the door</span><span class="ru">Счётчик на вводе</span></div>
+            <div class="v" id="live-grid"></div>
+          </div>
+          <div class="readout">
+            <div class="k"><span class="en">Offered to the car</span><span class="ru">Предложено машине</span></div>
+            <div class="v" id="live-offer"></div>
+          </div>
+          <div class="readout">
+            <div class="k"><span class="en">The car is taking</span><span class="ru">Машина берёт</span></div>
+            <div class="v" id="live-car"></div>
+          </div>
+          <div class="readout">
+            <div class="k"><span class="en">Bought for the car today</span><span class="ru">Куплено для машины</span></div>
+            <div class="v" id="live-bought"></div>
+          </div>
+          <div class="readout">
+            <div class="k"><span class="en">Given away it could have had</span><span class="ru">Отдано зря</span></div>
+            <div class="v" id="live-spilled"></div>
+          </div>
+          <div class="readout">
+            <div class="k"><span class="en">Into the car</span><span class="ru">В машину</span></div>
+            <div class="v" id="live-energy"></div>
+          </div>
+        </div>
+        <p class="note" id="live-why"></p>
+      </div>
+
+      <div class="card" style="margin-top: 12px">
+        <h3><span class="en">Plant a bug</span><span class="ru">Посадить баг</span></h3>
+        <p class="small muted">
+          <span class="en"
+            >Each switch makes the same change to the controller that the mutation check makes in Python, and turning
+            one on turns the check that watches for it red. These are the bugs a check here can actually show you;
+            the rest are about timing, which one day in a browser cannot tell apart from a controller doing its job.
+            The whole set of thirty-seven is in the bug hunt.</span
+          >
+          <span class="ru"
+            >Каждый переключатель вносит в контроллер то же изменение, что и мутационная проверка в Python, и
+            включение одного красит ту проверку, которая за ним следит. Здесь только те баги, которые проверка может
+            показать наглядно; остальные — про время, а один день в браузере не отличает их от правильной работы.
+            Все тридцать семь — в разделе «Охота на баги».</span
+          >
+        </p>
+        <div class="bugs" id="live-bugs"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3><span class="en">The weather</span><span class="ru">Погода</span></h3>
+        <div class="ctl">
+          <label for="live-sun"
+            ><span><span class="en">How strong the sun is</span><span class="ru">Насколько сильное солнце</span></span
+            ><b id="live-sun-label"></b
+          ></label>
+          <input type="range" id="live-sun" min="0" max="100" step="5" value="100" />
+        </div>
+        <div class="row">
+          <button type="button" class="btn" id="live-cloud">
+            <span class="en">Send a cloud over</span><span class="ru">Пустить облако</span>
+          </button>
+          <button type="button" class="btn" id="live-long-cloud">
+            <span class="en">A cloud that stays</span><span class="ru">Облако надолго</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 12px">
+        <h3><span class="en">The household</span><span class="ru">Дом</span></h3>
+        <div class="row" id="live-loads"></div>
+      </div>
+
+      <div class="card" style="margin-top: 12px">
+        <h3><span class="en">The car and the wiring</span><span class="ru">Машина и проводка</span></h3>
+        <div class="row">
+          <button type="button" class="btn" id="live-plug" aria-pressed="true">
+            <span class="en">Car plugged in</span><span class="ru">Машина подключена</span>
+          </button>
+          <button type="button" class="btn" id="live-switching" aria-pressed="true">
+            <span class="en">May switch phases</span><span class="ru">Можно менять фазы</span>
+          </button>
+          <button type="button" class="btn danger" id="live-meter" aria-pressed="false">
+            <span class="en">Cut the meter</span><span class="ru">Оборвать счётчик</span>
+          </button>
+          <button type="button" class="btn" id="live-reset">
+            <span class="en">Start over</span><span class="ru">Начать заново</span>
+          </button>
+        </div>
+        <div class="ctl" style="margin-top: 10px">
+          <label><span class="en">How fast time runs</span><span class="ru">Как быстро идёт время</span></label>
+          <div class="row" id="live-speed"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 12px">
+        <h3><span class="en">Checks that run all the time</span><span class="ru">Проверки, которые идут всё время</span></h3>
+        <p class="small muted">
+          <span class="en"
+            >Short versions of the real tests. They look at the house after every simulated second. A grey circle
+            means the situation has not come up yet.</span
+          >
+          <span class="ru"
+            >Короткие версии настоящих тестов. Они смотрят на дом после каждой смоделированной секунды. Серый кружок
+            значит, что случай ещё не наступил.</span
+          >
+        </p>
+        <div class="checks" id="live-checks"></div>
+      </div>
+    </div>
+  </div>
+</section>

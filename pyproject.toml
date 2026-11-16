@@ -1,0 +1,61 @@
+[project]
+name = "surplus-lab"
+version = "1.0.0"
+description = "A solar-surplus EV charging controller and the tests that prove it never buys, never spills and never jerks the car about"
+requires-python = ">=3.12"
+dependencies = ["websockets>=13"]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3",
+  "pytest-timeout>=2.3",
+  "hypothesis>=6.112",
+  "allure-pytest>=2.13",
+  "ruff>=0.7",
+  "mypy>=1.13",
+]
+pages = ["playwright~=1.63.0"]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "tests"]
+addopts = "-ra --strict-markers --timeout=180"
+markers = [
+  "smoke: the critical path, run first",
+  "once: does not depend on the driver; runs only in the direct run",
+  "driver: proves one driver carries commands and readings faithfully",
+  "pages: opens the visual page in a browser (needs Playwright)",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "PT", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+# Both hold wide data tables — planted bugs and scripted days — that read better on one line each.
+"scripts/mutants.py" = ["E501"]
+"scripts/build_pages.py" = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["surplus_lab", "support", "conftest"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+disallow_untyped_calls = false
+mypy_path = ["src", "tests"]
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = ["websockets", "websockets.*", "allure", "allure_commons", "allure_commons.*"]
+ignore_missing_imports = true
