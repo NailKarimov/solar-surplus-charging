@@ -489,6 +489,39 @@ footer.foot {
   font-weight: 600;
   font-size: 13px;
 }
+/* The picture is repainted a few times a second, so the parts that move are eased: a needle that
+   snaps between readings reads as a flicker, and the eye cannot follow it. */
+.scene .needle {
+  transition:
+    transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1),
+    stroke 0.25s linear;
+}
+.scene .sun,
+.scene .cloud,
+.scene .panelglow,
+.scene .batteryfill,
+.scene .window,
+.scene .window2 {
+  transition:
+    opacity 0.5s linear,
+    fill 0.4s linear,
+    width 0.5s linear;
+}
+.scene .disc {
+  transition: r 0.5s linear;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene .needle,
+  .scene .sun,
+  .scene .cloud,
+  .scene .disc,
+  .scene .panelglow,
+  .scene .batteryfill,
+  .scene .window,
+  .scene .window2 {
+    transition: none;
+  }
+}
 .flow {
   fill: none;
   stroke-width: 4;
@@ -516,6 +549,90 @@ footer.foot {
   }
   html {
     scroll-behavior: auto;
+  }
+}
+
+/* ---- tour: one day in seven moments ---- */
+.story {
+  display: grid;
+  gap: 12px;
+}
+.chapters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chapters button {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+}
+.chapters button .n {
+  font: 600 12px var(--font-mono);
+  color: var(--muted);
+  margin-right: 7px;
+}
+.chapters button[aria-pressed='true'] .n {
+  color: var(--wire);
+}
+.bar {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sunk);
+  overflow: hidden;
+}
+.bar > i {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: var(--sun-fill);
+}
+.storycap {
+  display: grid;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--sun-fill);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  min-height: 150px;
+  align-content: start;
+}
+.storycap .what {
+  font: 600 17px/1.4 var(--font-display);
+}
+.storycap .does {
+  font-size: 15px;
+  color: var(--muted);
+}
+.storycap .says {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+/* The controller's own words can be a whole sentence; on a phone they break rather than widen the page. */
+.storycap .says .pill {
+  white-space: normal;
+}
+.storycap > * {
+  min-width: 0;
+}
+.playbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.playbar .btn[disabled] {
+  opacity: 0.45;
+  cursor: default;
+}
+.playbar .btn[disabled]:hover {
+  border-color: var(--line);
+}
+@media (min-width: 880px) {
+  .storycap {
+    min-height: 128px;
   }
 }
 
@@ -1392,7 +1509,11 @@ details.suite[open] > summary {
 .scene .sun .disc { fill: var(--solar); }
 .scene .sun .rays { stroke: var(--solar); }
 .scene .panelglow { fill: var(--solar); }
-.scene .flow.grid.on { stroke: var(--bad); }
+/* The wire to the grid carries money in both directions, but not the same amount of it: electricity
+   bought is red, sun given away is only slate. One red arrow for both would make the cheap mistake
+   look like the expensive one. */
+.scene .flow.grid.on { stroke: var(--roof); }
+.scene .flow.grid.on.buying { stroke: var(--bad); }
 .scene .flow.power.on { stroke: var(--wire); }
 .daychart .moment.stop { stroke: var(--bad); opacity: 0.45; stroke-dasharray: 3 3; }
 .daychart .moment.start { stroke: var(--ok); opacity: 0.45; stroke-dasharray: 3 3; }

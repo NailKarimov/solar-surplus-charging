@@ -168,11 +168,18 @@ finding SS-4, and it is the best argument for mutation testing there is.
 
 | View | What you can do |
 | --- | --- |
-| **What this is, in two minutes** | watch a day play itself, with the meter needle sitting on zero |
+| **What this is, in two minutes** | one day stopped at seven moments — first light, the sun arriving, a cloud, the two-minute wait after it, the oven, a shadow deep enough to stop for, and the evening — each played slowly enough to follow, each with a caption saying what the house did and what the controller did about it |
 | **The live house** | move the sun, send a cloud, put the kettle on, unplug the car, cut the meter, and **plant a bug** |
 | **A whole day** | the chart: what the roof made, what the car took, and the grid line on zero, for seven different days |
 | **Last test run** | every check as one sentence; open one and see its steps and the watt-hours it measured |
 | **Bug hunt** | all 37 planted bugs, the line each one changed, and the tests that caught it |
+
+The tour does not race. An earlier version played a whole day in a few seconds, and everything on the screen
+merely twitched: the point of a controller is *when* it acts, and at seven thousand times real time there is no
+when. It now stops at the seven moments where a decision is actually made, runs the slow ones at about thirty
+times real time, and prints the controller's own reason for what it just did. The captions were written against
+measured runs, not from memory, and three of the browser tests play those moments through and check that the
+offer really falls under the cloud and that the deep shadow really spends the ride-out budget and lets go.
 
 Two things keep the page honest. The days on the chart are produced by running the real controller against the
 real model — the page cannot show a day that did not happen. And the live house is a **JavaScript twin** of the

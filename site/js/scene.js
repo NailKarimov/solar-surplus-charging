@@ -65,13 +65,13 @@
       both(56, 322, 'the grid', 'сеть', 'lbl', 'middle') +
       '<path class="flow grid" d="M228 212 L 70 212"/>' +
       // the meter: a needle that must sit on zero
-      '<rect x="98" y="226" width="104" height="52" rx="7" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>' +
+      '<rect x="92" y="226" width="116" height="52" rx="7" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/>' +
       '<path d="M122 266 A 28 28 0 0 1 178 266" fill="none" stroke="var(--line)" stroke-width="3"/>' +
       '<line x1="150" y1="266" x2="150" y2="242" stroke="var(--muted)" stroke-width="1"/>' +
       '<line class="needle" x1="150" y1="266" x2="150" y2="244" stroke="var(--bad)" stroke-width="2.5" stroke-linecap="round"/>' +
-      both(104, 222, 'selling', 'отдаём', 'tiny', 'start') +
-      both(196, 222, 'buying', 'покупаем', 'tiny', 'end') +
-      '<text class="lcd gridtext" x="150" y="275" text-anchor="middle" style="font-size:11px" fill="var(--muted)"></text>' +
+      both(98, 222, 'selling', 'отдаём', 'tiny', 'start') +
+      both(202, 222, 'buying', 'покупаем', 'tiny', 'end') +
+      '<text class="lcd gridtext" x="150" y="275" text-anchor="middle" style="font-size:10.5px" fill="var(--muted)"></text>' +
       both(150, 322, 'the meter at the door', 'счётчик на вводе', 'lbl', 'middle') +
       '<text class="lcd clk" x="16" y="30" style="font-size:15px"></text>' +
       '<text class="lcd pvtext" x="744" y="30" text-anchor="end" style="font-size:13px"></text>' +

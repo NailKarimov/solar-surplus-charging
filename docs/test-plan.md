@@ -36,8 +36,9 @@ Structure after ISO/IEC/IEEE 29119-3. One page, because the project is one compo
    decision by decision and by the energy that ended up in the car.
 10. **Robustness.** Hypothesis over randomly generated readings and runs: the offer is always legal, a stale
     reading never charges, the offer never rises while the house is buying.
-11. **The visual page.** Five views open, the language switch works, the chart is drawn from the real run, and
-    planting a bug in the live house turns the matching check red.
+11. **The visual page.** Five views open, the language switch works, the chart is drawn from the real run,
+    planting a bug in the live house turns the matching check red, and the tour's seven moments play slowly
+    enough to follow and do what their captions claim.
 
 ## 3. What is out of scope
 
@@ -90,7 +91,7 @@ three drivers inside that same pass.
 
 **Entry.** The package installs, `ruff` and `mypy` are clean.
 
-**Exit.** All three passes green and the 25 browser tests green; `build_pages.py --check` leaves no text
+**Exit.** All three passes green and the 28 browser tests green; `build_pages.py --check` leaves no text
 untranslated; the twin check reports no difference across all twenty days; the mutation check catches 37 of 37
 with the control run passing; every finding recorded in the test report with its fix.
 

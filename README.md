@@ -9,7 +9,7 @@
 
 | Page                                                                                                                  | What it is                                                              |
 | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| **[What this is, in two minutes](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html#tour)**   | for a reader with no technical background: pictures and plain sentences |
+| **[What this is, in two minutes](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html#tour)**   | one day stopped at the seven moments where something happens, each with a caption |
 | **[The live house](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html#live)**                 | send a cloud over, put the kettle on, cut the meter, plant a bug        |
 | **[A whole day](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html#day)**                     | the chart that is the point of the project: the grid line sits on zero  |
 | [Last test run, replayed](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html#replay)          | every check as one sentence, with the kilowatt-hours it measured        |
@@ -45,7 +45,7 @@ turns the run into pictures: [open it](https://nailkarimov.github.io/solar-surpl
 | System under test  | A surplus-charging controller (`src/surplus_lab/control.py`) and the house it runs in: sun and cloud, household loads, a car that ramps and tapers, a grid meter that can go quiet |
 | Language and tools | Python 3.12; pytest, Hypothesis, websockets, Allure, ruff, mypy; Playwright and Node.js for the visual page                                                                        |
 | Types of testing   | Functional behaviour over whole days, boundary (the 6 A floor, the three-phase floor), state transitions, negative, fail-safe, property-based fuzzing, protocol conformance, cross-implementation |
-| Tests              | 100 across three kinds of wallbox (90 of them behaviour, run once against the model) + 25 browser tests of the visual page                                                         |
+| Tests              | 100 across three kinds of wallbox (90 of them behaviour, run once against the model) + 28 browser tests of the visual page                                                         |
 | Test quality       | 37/37 planted bugs caught (`scripts/mutants.py`); the JavaScript twin makes 88 560 identical decisions across 20 days, 8 of them generated at random                               |
 | Reports            | [Allure](https://nailkarimov.github.io/solar-surplus-charging/index.html) · [visual page](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html) · [mutation table](https://nailkarimov.github.io/solar-surplus-charging/mutants/result.md) |
 

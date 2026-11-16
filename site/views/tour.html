@@ -15,8 +15,41 @@
     >
   </p>
 
-  <div class="scene" id="tour-scene"></div>
-  <p class="note" id="tour-now"></p>
+  <h3><span class="en">One day, in seven moments</span><span class="ru">Один день за семь моментов</span></h3>
+  <p>
+    <span class="en"
+      >Below is one ordinary day in that house, stopped at the seven moments where something actually happens. Each
+      moment plays slowly enough to watch, and says what the house just did and what the controller did about it.
+      Everything moving in the picture is the real controller, deciding as it goes. The wallbox here is a
+      single-phase one, the commonest kind in a house, so “14 A × 1” on the cable means fourteen amps on one
+      phase — about 3.2 kW.</span
+    >
+    <span class="ru"
+      >Ниже — один обычный день в таком доме, остановленный на семи моментах, где действительно что-то происходит.
+      Каждый момент идёт достаточно медленно, чтобы его разглядеть, и подписан: что сделал дом и что на это ответил
+      контроллер. Всё, что движется в картинке, — настоящий контроллер, принимающий решения на ходу. Вольтбокс
+      здесь однофазный, самый обычный для дома, поэтому «14 А × 1» на кабеле значит четырнадцать ампер на одной
+      фазе — около 3,2 кВт.</span
+    >
+  </p>
+
+  <div class="story">
+    <div class="chapters" id="tour-chapters" role="group" aria-label="Moments of the day"></div>
+    <div class="scene" id="tour-scene"></div>
+    <div class="bar"><i id="tour-bar"></i></div>
+    <div class="storycap">
+      <div class="what" id="tour-what"></div>
+      <div class="does" id="tour-does"></div>
+      <div class="says" id="tour-says"></div>
+      <div class="small muted" id="tour-now"></div>
+    </div>
+    <div class="playbar">
+      <button class="btn primary" type="button" id="tour-play"></button>
+      <button class="btn" type="button" id="tour-prev"></button>
+      <button class="btn" type="button" id="tour-next"></button>
+      <span class="small muted" id="tour-pace"></span>
+    </div>
+  </div>
 
   <h3><span class="en">The one number that matters</span><span class="ru">Одно число, которое важно</span></h3>
   <p>

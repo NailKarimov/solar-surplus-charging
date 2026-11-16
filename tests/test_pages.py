@@ -54,6 +54,23 @@ EXERCISE = """() => {
 }"""
 
 
+# One moment of the tour, played at the twin's own tick rather than in real time.
+PLAY_MOMENT = """(index) => {
+  const d = App.views.tour.debug;
+  const chapter = d.chapters[index];
+  d.go(index, false);
+  const house = d.state().house;
+  const controller = d.state().controller;
+  const first = house.offered_a;
+  let spent = 0;
+  while (house.clock < chapter.to) {
+    Twin.tick(house, controller, 10);
+    spent = Math.max(spent, controller._ride_out_wh);
+  }
+  return { first: first, last: house.offered_a, spent: spent };
+}"""
+
+
 @pytest.fixture(scope="module")
 def browser() -> Iterator[Any]:
     missing = "Playwright is not installed: pip install -e '.[pages]'"
@@ -122,6 +139,41 @@ def test_the_live_house_really_charges_the_car(page: Any) -> None:
     page.evaluate("() => { const d = App.views.live.debug; for (let i = 0; i < 1200; i++) d.tick(10); d.paint(); }")
     energy = page.evaluate("() => App.views.live.debug.state().house.totals.car_wh")
     assert energy > 5000
+
+
+def test_the_tour_plays_one_day_slowly_enough_to_follow(page: Any) -> None:
+    """The tour is seven stopped moments, and the ones where a decision happens run near real time."""
+    open_view(page, "tour")
+    pace = page.evaluate("() => App.views.tour.debug.chapters.map(c => [c.label[0], (c.to - c.from) / c.real])")
+    rates = dict(pace)
+    assert len(pace) == 7
+    assert max(rates.values()) <= 420
+    assert rates["A cloud"] <= 40
+    assert rates["The oven"] <= 40
+
+
+def test_each_moment_of_the_tour_says_what_the_controller_did(page: Any) -> None:
+    """Every moment of the tour carries its own caption, the offer on the cable and its place in the day."""
+    open_view(page, "tour")
+    for index in range(7):
+        page.evaluate("(i) => App.views.tour.debug.go(i, false)", index)
+        page.wait_for_timeout(120)
+        assert len(page.locator("#tour-what").inner_text().strip()) > 40
+        assert len(page.locator("#tour-does").inner_text().strip()) > 80
+        assert "offering" in page.locator("#tour-says").inner_text()
+        assert f"Moment {index + 1} of 7" in page.locator("#tour-pace").inner_text()
+    assert page.errors == []
+
+
+def test_the_moments_of_the_tour_do_what_their_captions_claim(page: Any) -> None:
+    """Played through, the cloud moment lowers the offer and the deep shadow spends the budget and lets go."""
+    open_view(page, "tour")
+    cloud = page.evaluate(PLAY_MOMENT, 2)
+    assert cloud["last"] < cloud["first"]
+    assert cloud["last"] >= 6
+    shadow = page.evaluate(PLAY_MOMENT, 5)
+    assert shadow["spent"] >= 60
+    assert shadow["last"] == 0
 
 
 def test_the_day_view_draws_the_run_that_really_happened(page: Any) -> None:

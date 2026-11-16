@@ -9,8 +9,8 @@ Structure after ISO/IEC/IEEE 29119-3. Covers the run of 16 November 2026, `surpl
 | Straight into the model       | `pytest`                |     90 |       0 |
 | Through a Modbus TCP wallbox  | `DRIVER=modbus pytest`  |      5 |      85 |
 | Through an OCPP charge point  | `DRIVER=ocpp pytest`    |      5 |      85 |
-| The visual page in a browser  | `pytest -m pages`       |     25 |       0 |
-| **Total**                     |                         | **125** |         |
+| The visual page in a browser  | `pytest -m pages`       |     28 |       0 |
+| **Total**                     |                         | **128** |         |
 
 Nothing failed. The skips are the design of the matrix, not gaps: a behaviour test runs once, against the model,
 because the control law does not depend on the wire its number travels down — and that claim is itself one of the
