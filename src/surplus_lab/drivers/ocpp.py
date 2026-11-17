@@ -102,20 +102,29 @@ class Station:
         return "Accepted"
 
     def _meter_values(self) -> dict[str, Any]:
+        """What the station reports about the car: watts, the current offered, and one sample a phase.
+
+        OCPP 1.6 has no field for "how many phases are in use". It has a ``phase`` on each sampled
+        value, so a three-phase session reports three ``Current.Import`` samples, L1 to L3, and the
+        reader counts them. An earlier version of this station put the number of phases into a
+        ``Current.Offered`` sample, which means amps — see finding SS-6: the wire view of the visual
+        page is what made it obvious.
+        """
         house = self.house
-        return {
-            "connectorId": 1,
-            "meterValue": [
+        samples: list[dict[str, str]] = [
+            {"value": f"{house.car_w():.1f}", "measurand": "Power.Active.Import", "unit": "W"},
+            {"value": f"{house.offered_a:.1f}", "measurand": "Current.Offered", "unit": "A"},
+        ]
+        for phase in range(1, house.phases + 1):
+            samples.append(
                 {
-                    "timestamp": f"{house.clock}",
-                    "sampledValue": [
-                        {"value": f"{house.car_w():.1f}", "measurand": "Power.Active.Import", "unit": "W"},
-                        {"value": f"{house.car.drawing_a:.1f}", "measurand": "Current.Import", "unit": "A"},
-                        {"value": str(house.phases), "measurand": "Current.Offered", "unit": "A"},
-                    ],
+                    "value": f"{house.car.drawing_a:.1f}",
+                    "measurand": "Current.Import",
+                    "unit": "A",
+                    "phase": f"L{phase}",
                 }
-            ],
-        }
+            )
+        return {"connectorId": 1, "meterValue": [{"timestamp": f"{house.clock}", "sampledValue": samples}]}
 
     def close(self) -> None:
         self._stop.set()
@@ -141,6 +150,21 @@ class OcppDriver:
         self.last_car_w = 0.0
         self.last_phases = house.phases
         self.plugged = True
+        # As on the Modbus driver: when this is a list, every message is kept as it was sent or
+        # received, so the page can show the conversation rather than a drawing of one.
+        self.tape: list[dict[str, str]] | None = None
+
+    def _say(self, socket: ServerConnection, raw: str) -> None:
+        if self.tape is not None:
+            self.tape.append({"dir": "->", "text": raw})
+        socket.send(raw)
+
+    def _hear(self, socket: ServerConnection, timeout: float = 5) -> list[Any]:
+        raw = str(socket.recv(timeout=timeout))
+        if self.tape is not None:
+            self.tape.append({"dir": "<-", "text": raw})
+        frame: list[Any] = json.loads(raw)
+        return frame
 
     @property
     def url(self) -> str:
@@ -162,13 +186,13 @@ class OcppDriver:
     def read(self, clock: int) -> Reading:
         socket = self._wait_for_station()
         message_id = str(next(self._ids))
-        socket.send(_call(message_id, "TriggerMessage", {"requestedMessage": "MeterValues"}))
+        self._say(socket, _call(message_id, "TriggerMessage", {"requestedMessage": "MeterValues"}))
         while True:
-            frame = json.loads(socket.recv(timeout=5))
+            frame = self._hear(socket)
             if frame[0] == CALLRESULT and frame[1] == message_id:
                 continue
             if frame[0] == CALL and frame[2] == "MeterValues":
-                socket.send(_result(frame[1], {}))
+                self._say(socket, _result(frame[1], {}))
                 self._take(frame[3])
                 break
         meter = self.house.meter  # the grid meter: a separate device, not part of OCPP
@@ -182,19 +206,22 @@ class OcppDriver:
         )
 
     def _take(self, payload: dict[str, Any]) -> None:
+        phases = set()
         for sample in payload["meterValue"][0]["sampledValue"]:
             if sample["measurand"] == "Power.Active.Import":
                 self.last_car_w = float(sample["value"])
-            elif sample["measurand"] == "Current.Offered":
-                self.last_phases = int(float(sample["value"]))
+            elif sample["measurand"] == "Current.Import" and sample.get("phase"):
+                phases.add(sample["phase"])
+        if phases:
+            self.last_phases = len(phases)
 
     def send(self, action: str, payload: dict[str, Any]) -> dict[str, Any]:
         """Send the station any OCPP call and wait for its answer. The back office may ask anything."""
         socket = self._wait_for_station()
         message_id = str(next(self._ids))
-        socket.send(_call(message_id, action, payload))
+        self._say(socket, _call(message_id, action, payload))
         while True:
-            frame = json.loads(socket.recv(timeout=5))
+            frame = self._hear(socket)
             if frame[0] == CALLRESULT and frame[1] == message_id:
                 return dict(frame[2])
             if frame[0] == CALLERROR and frame[1] == message_id:
@@ -204,7 +231,8 @@ class OcppDriver:
         socket = self._wait_for_station()
         message_id = str(next(self._ids))
         limit = command.amps if command.amps >= MIN_CHARGE_A else 0.0
-        socket.send(
+        self._say(
+            socket,
             _call(
                 message_id,
                 "SetChargingProfile",
@@ -223,10 +251,10 @@ class OcppDriver:
                         },
                     },
                 },
-            )
+            ),
         )
         while True:
-            frame = json.loads(socket.recv(timeout=5))
+            frame = self._hear(socket)
             if frame[0] in (CALLRESULT, CALLERROR) and frame[1] == message_id:
                 break
 

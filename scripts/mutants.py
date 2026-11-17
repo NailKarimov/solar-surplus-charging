@@ -96,6 +96,7 @@ MUTANTS = [
     Mutant("M35", "wire", "drivers/ocpp.py", "        if self.refuse_above_a is not None and amps > self.refuse_above_a:\n            self.rejected += 1\n            return \"Rejected\"", "        if False:\n            self.rejected += 1\n            return \"Rejected\"", "The station accepts every profile, even one it cannot honour"),
     Mutant("M36", "wire", "drivers/ocpp.py", "        if schedule.get(\"chargingRateUnit\") != \"A\":\n            self.rejected += 1\n            return \"Rejected\"", "        if False:\n            self.rejected += 1\n            return \"Rejected\"", "A limit in watts is treated as a limit in amps"),
     Mutant("M37", "wire", "drivers/ocpp.py", "        limit = command.amps if command.amps >= MIN_CHARGE_A else 0.0", "        limit = max(command.amps, MIN_CHARGE_A)", "A pause is sent to the station as a six amp limit, so the car charges through it"),
+    Mutant("M38", "wire", "drivers/ocpp.py", "                    \"phase\": f\"L{phase}\",", "                    \"phase\": \"L1\",", "Every phase of a three-phase session is reported as L1, so three phases read as one"),
 ]
 # fmt: on
 

@@ -11,9 +11,10 @@
 | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | **[What this is, in two minutes](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html#tour)**   | one day stopped at the seven moments where something happens, each with a caption |
 | **[The live house](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html#live)**                 | send a cloud over, put the kettle on, cut the meter, plant a bug        |
+| **[On the wire](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html#wire)**                    | the same decision as a Modbus register and as an OCPP profile, byte by byte |
 | **[A whole day](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html#day)**                     | the chart that is the point of the project: the grid line sits on zero  |
 | [Last test run, replayed](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html#replay)          | every check as one sentence, with the kilowatt-hours it measured        |
-| [Bug hunt](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html#bugs)                           | 37 planted bugs and the checks that caught each                         |
+| [Bug hunt](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html#bugs)                           | 38 planted bugs and the checks that caught each                         |
 | [Allure test report](https://nailkarimov.github.io/solar-surplus-charging/index.html)                                 | latest CI run, three passes of the suite                                |
 
 Click these links: opening an `.html` file in the file list shows its source code, GitHub does not run it.
@@ -45,8 +46,8 @@ turns the run into pictures: [open it](https://nailkarimov.github.io/solar-surpl
 | System under test  | A surplus-charging controller (`src/surplus_lab/control.py`) and the house it runs in: sun and cloud, household loads, a car that ramps and tapers, a grid meter that can go quiet |
 | Language and tools | Python 3.12; pytest, Hypothesis, websockets, Allure, ruff, mypy; Playwright and Node.js for the visual page                                                                        |
 | Types of testing   | Functional behaviour over whole days, boundary (the 6 A floor, the three-phase floor), state transitions, negative, fail-safe, property-based fuzzing, protocol conformance, cross-implementation |
-| Tests              | 100 across three kinds of wallbox (90 of them behaviour, run once against the model) + 28 browser tests of the visual page                                                         |
-| Test quality       | 37/37 planted bugs caught (`scripts/mutants.py`); the JavaScript twin makes 88 560 identical decisions across 20 days, 8 of them generated at random                               |
+| Tests              | 101 across three kinds of wallbox (91 of them behaviour, run once against the model) + 34 browser tests of the visual page                                                         |
+| Test quality       | 38/38 planted bugs caught (`scripts/mutants.py`); the JavaScript twin makes 88 560 identical decisions across 20 days, 8 of them generated at random, and rebuilds the drivers' own frames byte for byte                               |
 | Reports            | [Allure](https://nailkarimov.github.io/solar-surplus-charging/index.html) · [visual page](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html) · [mutation table](https://nailkarimov.github.io/solar-surplus-charging/mutants/result.md) |
 
 ## What is tested
@@ -62,7 +63,7 @@ turns the run into pictures: [open it](https://nailkarimov.github.io/solar-surpl
 | `test_failsafe`         | A meter that has gone quiet stops the charging; an unplugged car is offered nothing; the night is not spent buying     |
 | `test_drivers`          | The Modbus register map and the OCPP exchange, and a whole day replayed through all three wallboxes, decision by decision |
 | `test_robustness`       | Hypothesis: whatever the meter says, the offer is zero or a legal whole number of amps                                |
-| `test_pages`, `twin.test.mjs` | The visual page works in a browser, and its JavaScript twin decides exactly like the Python controller          |
+| `test_pages`, `twin.test.mjs` | The visual page works in a browser, its JavaScript twin decides exactly like the Python controller, and the frames it draws are the ones the drivers really sent |
 
 ## The seven days
 
@@ -81,11 +82,15 @@ Measured, not asserted. This table is produced by running the real controller ag
 Broken cloud is the hard one, and it is where the trade-off is visible: holding on through shadows costs a little
 bought electricity, and letting go costs spilled sun. The suite asserts that both stay inside a budget.
 
+[![One decision, as a Modbus register and as an OCPP profile, byte by byte](docs/img/wire.png)](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html#wire)
+
 ## Findings
 
 No defects are open: the system under test is this project's own controller, and it is corrected when a test finds
-a fault. Five findings made on the way — including one the mutation check turned up that was a problem with the
-*design* rather than the tests — are in [`docs/test-report.md`](docs/test-report.md), section 3. Bug reports for
+a fault. Six findings made on the way — one the mutation check turned up that was a problem with the *design*
+rather than the tests, and one that no test could have found because both ends of a protocol shared the same
+misunderstanding until the page printed the message out — are in
+[`docs/test-report.md`](docs/test-report.md), section 3. Bug reports for
 third-party systems of the portfolio are on the [QA defects board](https://github.com/users/NailKarimov/projects/2).
 
 ## Running it
@@ -100,9 +105,9 @@ pip install -e ".[dev,pages]"
 pytest                               # the control law, against the model
 DRIVER=modbus pytest                 # the driver checks, over a real Modbus TCP socket
 DRIVER=ocpp pytest                   # the driver checks, over a real OCPP WebSocket
-python scripts/mutants.py            # plant 37 bugs, one at a time, and count the catches
+python scripts/mutants.py            # plant 38 bugs, one at a time, and count the catches
 python scripts/build_pages.py        # rebuild docs/surplus-charging.html from the last run
-node site/test/twin.test.mjs         # the page's JavaScript twin against the Python controller
+node site/test/twin.test.mjs         # the twin and the frame encoders against the Python originals
 ```
 
 ## Project structure
@@ -114,8 +119,8 @@ src/surplus_lab/day.py        the named days, and the four-line loop that runs o
 src/surplus_lab/drivers/      straight into the model, a Modbus TCP wallbox, an OCPP 1.6 charge point
 tests/                        one file per subject; conftest.py picks the driver and records the run
 tests/support/                the rig that wires a house to a controller, and the evidence recorder
-scripts/                      mutants.py (mutation check), build_pages.py (visual page, twin vectors)
-site/                         source of the visual page: five views, the chart, the JavaScript twin
+scripts/                      mutants.py (mutation check), build_pages.py (visual page, twin vectors), wire.py (real frames, labelled byte by byte)
+site/                         source of the visual page: six views, the chart, the JavaScript twin and the two frame encoders
 docs/                         the built page, test plan, test report, guide, screenshots
 evidence/                     mutants.json; run-<driver>.json is written by every test run
 ```
@@ -156,7 +161,7 @@ release with that file as its notes.
 | [`docs/test-plan.md`](docs/test-plan.md)                 | test plan (ISO/IEC/IEEE 29119-3)                                           |
 | [`docs/test-report.md`](docs/test-report.md)             | test summary report: latest results, findings, deviations                  |
 | [`docs/surplus-charging.md`](docs/surplus-charging.md)   | guide: the problem, the control law, the two drivers, the page             |
-| [`docs/surplus-charging.html`](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html) | the same as an interactive page with five views (EN/RU) |
+| [`docs/surplus-charging.html`](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html) | the same as an interactive page with six views (EN/RU) |
 | [`mutants-result.md`](mutants-result.md)                 | the mutation table of the latest full run                                  |
 
 ## Part of a portfolio

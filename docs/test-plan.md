@@ -36,9 +36,10 @@ Structure after ISO/IEC/IEEE 29119-3. One page, because the project is one compo
    decision by decision and by the energy that ended up in the car.
 10. **Robustness.** Hypothesis over randomly generated readings and runs: the offer is always legal, a stale
     reading never charges, the offer never rises while the house is buying.
-11. **The visual page.** Five views open, the language switch works, the chart is drawn from the real run,
-    planting a bug in the live house turns the matching check red, and the tour's seven moments play slowly
-    enough to follow and do what their captions claim.
+11. **The visual page.** Six views open, the language switch works, the chart is drawn from the real run,
+    planting a bug in the live house turns the matching check red, the tour's seven moments play slowly
+    enough to follow and do what their captions claim, and the wire view shows the frames the drivers
+    really sent — including what a refusal looks like in each protocol.
 
 ## 3. What is out of scope
 
@@ -61,8 +62,8 @@ Structure after ISO/IEC/IEEE 29119-3. One page, because the project is one compo
 | State transitions              | `test_clouds`, `test_floor`                                | Charging, riding out the floor, stopped, waiting to resume — the machine the day runs over           |
 | Negative testing               | `test_drivers`                                             | A current the wallbox cannot give, a register that does not exist, a profile in the wrong unit       |
 | Property-based (Hypothesis)    | `test_robustness`                                          | Invariants that must hold on days nobody wrote, including weather no roof will ever see              |
-| Cross-implementation           | `test_drivers`, `site/test/twin.test.mjs`                  | Three wallboxes must agree; the page's JavaScript twin must decide exactly like the Python original  |
-| Mutation testing               | `scripts/mutants.py`                                       | 37 planted bugs measure whether the suite would notice a real one                                    |
+| Cross-implementation           | `test_drivers`, `site/test/twin.test.mjs`                  | Three wallboxes must agree; the page's twin must decide exactly like the Python original, and rebuild its frames byte for byte |
+| Mutation testing               | `scripts/mutants.py`                                       | 38 planted bugs measure whether the suite would notice a real one                                    |
 
 Each test carries one claim, written as the docstring sentence. Collection fails without it, so the report and the
 visual page cannot drift from the code.
@@ -91,8 +92,8 @@ three drivers inside that same pass.
 
 **Entry.** The package installs, `ruff` and `mypy` are clean.
 
-**Exit.** All three passes green and the 28 browser tests green; `build_pages.py --check` leaves no text
-untranslated; the twin check reports no difference across all twenty days; the mutation check catches 37 of 37
+**Exit.** All three passes green and the 34 browser tests green; `build_pages.py --check` leaves no text
+untranslated; the twin check reports no difference across all twenty days; the mutation check catches 38 of 38
 with the control run passing; every finding recorded in the test report with its fix.
 
 ## 7. Risks
@@ -101,12 +102,12 @@ with the control run passing; every finding recorded in the test report with its
 | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | A controller tested against its own model passes by agreeing with it | The promises are measured in energy the model moved, and the model is mutated too (M28–M30)     |
 | Budgets tuned until the tests pass                                   | Budgets are round numbers with headroom, written per day, and the measured values are published |
-| A test passes because it asserts what the code happens to do         | Mutation testing: 37 planted bugs must each turn some test red                                  |
+| A test passes because it asserts what the code happens to do         | Mutation testing: 38 planted bugs must each turn some test red                                  |
 | The visual page shows something other than the real controller       | The twin is compared decision by decision; a difference fails the build                         |
 | A bug that two code paths can mask each other on                     | Found exactly that way once; see finding SS-4                                                   |
 | Weather the author happened to think of                              | Eight days generated at random feed the twin check, and Hypothesis generates readings           |
 
 ## 8. Deliverables
 
-Allure report, the five-view visual page, `docs/test-report.md`, `mutants-result.md`, and the evidence files
+Allure report, the six-view visual page, `docs/test-report.md`, `mutants-result.md`, and the evidence files
 `evidence/run-<driver>.json`.

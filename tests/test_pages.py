@@ -17,7 +17,7 @@ import pytest
 pytestmark = pytest.mark.pages
 
 PAGE = Path(__file__).resolve().parent.parent / "docs" / "surplus-charging.html"
-VIEWS = ("tour", "live", "day", "replay", "bugs")
+VIEWS = ("tour", "live", "wire", "day", "replay", "bugs")
 
 # planted bug -> the live check it must turn red
 BUG_TO_CHECK = {
@@ -174,6 +174,61 @@ def test_the_moments_of_the_tour_do_what_their_captions_claim(page: Any) -> None
     shadow = page.evaluate(PLAY_MOMENT, 5)
     assert shadow["spent"] >= 60
     assert shadow["last"] == 0
+
+
+def test_the_wire_view_shows_the_real_frames_of_both_drivers(page: Any) -> None:
+    """Each moment shows the Modbus frame and the OCPP message that carried that very decision."""
+    open_view(page, "wire")
+    assert page.locator("#wire-moments button").count() == 4
+    for index in range(4):
+        page.locator("#wire-moments button").nth(index).click()
+        page.wait_for_timeout(120)
+        hexes = page.locator("#wire-modbus .hexline").all_inner_texts()
+        assert len(hexes) == 2, "a question and an answer"
+        ask = hexes[0]
+        assert ask[14:18] == "1007", f"function 16 writing register 2000, not {ask}"
+        assert page.locator("#wire-modbus .seg").count() >= 8, "every byte carries a label"
+        assert "SetChargingProfile" in page.locator("#wire-ocpp").inner_text()
+        assert "chargingRateUnit" in page.locator("#wire-ocpp").inner_text()
+    assert page.errors == []
+
+
+def test_the_wire_view_shows_the_reading_and_the_two_refusals(page: Any) -> None:
+    """It also shows what each driver reads, and what a wallbox says when it will not do as asked."""
+    open_view(page, "wire")
+    assert "function 3" in page.locator("#wire-read-modbus").inner_text()
+    assert "the meter" in page.locator("#wire-read-modbus").inner_text()
+    assert "TriggerMessage" in page.locator("#wire-read-ocpp").inner_text()
+    assert "MeterValues" in page.locator("#wire-read-ocpp").inner_text()
+    assert page.locator("#wire-no-modbus .seg.ex").count() >= 1, "the exception bytes are marked as such"
+    assert "Rejected" in page.locator("#wire-no-ocpp").inner_text()
+    assert page.locator("#wire-map .part").count() >= 8
+    assert page.errors == []
+
+
+def test_the_live_house_does_not_race_past_the_eye(page: Any) -> None:
+    """Time in the live house runs at the speed the buttons say, not at whatever the frame rate is."""
+    open_view(page, "live")
+    for label, cap in (("×10", 30), ("×60", 150)):
+        page.locator(f"#live-speed button:text-is('{label}')").click()
+        page.wait_for_timeout(100)
+        before = page.evaluate("() => App.views.live.debug.state().house.clock")
+        page.wait_for_timeout(1000)
+        after = page.evaluate("() => App.views.live.debug.state().house.clock")
+        assert after - before <= cap, f"{label} ran at {after - before} simulated seconds per second"
+    assert "10 seconds" in page.locator("#live-pace").inner_text()
+
+
+def test_the_live_house_shows_what_went_down_the_wire(page: Any) -> None:
+    """The live house prints the last decision as both drivers would put it on the wire."""
+    open_view(page, "live")
+    page.evaluate("() => { const d = App.views.live.debug; for (let i = 0; i < 600; i++) d.tick(10); d.paint(); }")
+    page.wait_for_timeout(200)
+    text = page.locator("#live-wire").inner_text()
+    assert "07d0" in text, "the register the current is written into"
+    assert "SetChargingProfile" in text
+    assert "register 2000" in text
+    assert page.errors == []
 
 
 def test_the_day_view_draws_the_run_that_really_happened(page: Any) -> None:

@@ -1,11 +1,11 @@
 {
  "meta": {
-  "finished": "2026-11-16T18:15:40Z",
+  "finished": "2026-11-17T17:11:23Z",
   "commit": "",
-  "total": 37,
-  "caught": 37,
+  "total": 38,
+  "caught": 38,
   "control": true,
-  "seconds": 306
+  "seconds": 458
  },
  "mutants": [
   {
@@ -92,7 +92,7 @@
     }
    ],
    "killer_count": 29,
-   "seconds": 14.9
+   "seconds": 33.7
   },
   {
    "id": "M02",
@@ -178,7 +178,7 @@
     }
    ],
    "killer_count": 18,
-   "seconds": 16.6
+   "seconds": 32.9
   },
   {
    "id": "M03",
@@ -252,7 +252,7 @@
     }
    ],
    "killer_count": 10,
-   "seconds": 16.8
+   "seconds": 33.5
   },
   {
    "id": "M04",
@@ -332,7 +332,7 @@
     }
    ],
    "killer_count": 11,
-   "seconds": 15.8
+   "seconds": 25.9
   },
   {
    "id": "M05",
@@ -355,10 +355,16 @@
      "name": "test_the_offer_never_goes_above_what_the_wallbox_is_rated_for",
      "title": "However much sun there is, the offer never exceeds the wallbox's rating.",
      "suite": "test_floor"
+    },
+    {
+     "id": "tests/test_robustness.py::test_a_run_of_nonsense_never_produces_an_illegal_offer",
+     "name": "test_a_run_of_nonsense_never_produces_an_illegal_offer",
+     "title": "Two hours of randomly generated weather never gets the controller to make an illegal offer.",
+     "suite": "test_robustness"
     }
    ],
-   "killer_count": 2,
-   "seconds": 16.3
+   "killer_count": 3,
+   "seconds": 45.3
   },
   {
    "id": "M06",
@@ -378,7 +384,7 @@
     }
    ],
    "killer_count": 1,
-   "seconds": 15.7
+   "seconds": 25.4
   },
   {
    "id": "M07",
@@ -410,7 +416,7 @@
     }
    ],
    "killer_count": 3,
-   "seconds": 15.4
+   "seconds": 21.6
   },
   {
    "id": "M08",
@@ -436,7 +442,7 @@
     }
    ],
    "killer_count": 2,
-   "seconds": 16.0
+   "seconds": 22.8
   },
   {
    "id": "M09",
@@ -456,7 +462,7 @@
     }
    ],
    "killer_count": 1,
-   "seconds": 16.1
+   "seconds": 23.9
   },
   {
    "id": "M10",
@@ -482,7 +488,7 @@
     }
    ],
    "killer_count": 2,
-   "seconds": 15.9
+   "seconds": 23.8
   },
   {
    "id": "M11",
@@ -508,7 +514,7 @@
     }
    ],
    "killer_count": 2,
-   "seconds": 15.9
+   "seconds": 20.5
   },
   {
    "id": "M12",
@@ -570,7 +576,7 @@
     }
    ],
    "killer_count": 8,
-   "seconds": 14.6
+   "seconds": 19.3
   },
   {
    "id": "M13",
@@ -590,7 +596,7 @@
     }
    ],
    "killer_count": 1,
-   "seconds": 16.2
+   "seconds": 23.3
   },
   {
    "id": "M14",
@@ -622,7 +628,7 @@
     }
    ],
    "killer_count": 3,
-   "seconds": 16.7
+   "seconds": 22.2
   },
   {
    "id": "M15",
@@ -654,7 +660,7 @@
     }
    ],
    "killer_count": 3,
-   "seconds": 16.7
+   "seconds": 21.1
   },
   {
    "id": "M16",
@@ -686,7 +692,7 @@
     }
    ],
    "killer_count": 3,
-   "seconds": 17.4
+   "seconds": 22.0
   },
   {
    "id": "M17",
@@ -712,7 +718,7 @@
     }
    ],
    "killer_count": 2,
-   "seconds": 17.7
+   "seconds": 22.0
   },
   {
    "id": "M18",
@@ -744,7 +750,7 @@
     }
    ],
    "killer_count": 3,
-   "seconds": 16.3
+   "seconds": 21.2
   },
   {
    "id": "M19",
@@ -770,7 +776,7 @@
     }
    ],
    "killer_count": 2,
-   "seconds": 16.0
+   "seconds": 22.5
   },
   {
    "id": "M20",
@@ -850,7 +856,7 @@
     }
    ],
    "killer_count": 11,
-   "seconds": 16.1
+   "seconds": 22.2
   },
   {
    "id": "M21",
@@ -870,7 +876,7 @@
     }
    ],
    "killer_count": 1,
-   "seconds": 16.1
+   "seconds": 21.7
   },
   {
    "id": "M22",
@@ -896,7 +902,7 @@
     }
    ],
    "killer_count": 2,
-   "seconds": 15.6
+   "seconds": 21.9
   },
   {
    "id": "M23",
@@ -916,7 +922,7 @@
     }
    ],
    "killer_count": 1,
-   "seconds": 15.7
+   "seconds": 21.9
   },
   {
    "id": "M24",
@@ -972,7 +978,7 @@
     }
    ],
    "killer_count": 7,
-   "seconds": 16.4
+   "seconds": 22.6
   },
   {
    "id": "M25",
@@ -998,7 +1004,7 @@
     }
    ],
    "killer_count": 2,
-   "seconds": 16.2
+   "seconds": 25.3
   },
   {
    "id": "M26",
@@ -1024,7 +1030,7 @@
     }
    ],
    "killer_count": 2,
-   "seconds": 15.8
+   "seconds": 25.6
   },
   {
    "id": "M27",
@@ -1062,7 +1068,7 @@
     }
    ],
    "killer_count": 4,
-   "seconds": 17.6
+   "seconds": 27.8
   },
   {
    "id": "M28",
@@ -1112,7 +1118,7 @@
     }
    ],
    "killer_count": 6,
-   "seconds": 15.5
+   "seconds": 26.4
   },
   {
    "id": "M29",
@@ -1198,7 +1204,7 @@
     }
    ],
    "killer_count": 20,
-   "seconds": 15.8
+   "seconds": 24.6
   },
   {
    "id": "M30",
@@ -1224,7 +1230,7 @@
     }
    ],
    "killer_count": 2,
-   "seconds": 15.6
+   "seconds": 25.2
   },
   {
    "id": "M31",
@@ -1262,7 +1268,7 @@
     }
    ],
    "killer_count": 4,
-   "seconds": 15.1
+   "seconds": 22.1
   },
   {
    "id": "M32",
@@ -1282,7 +1288,7 @@
     }
    ],
    "killer_count": 1,
-   "seconds": 15.2
+   "seconds": 20.2
   },
   {
    "id": "M33",
@@ -1326,7 +1332,7 @@
     }
    ],
    "killer_count": 5,
-   "seconds": 15.6
+   "seconds": 22.5
   },
   {
    "id": "M34",
@@ -1346,7 +1352,7 @@
     }
    ],
    "killer_count": 1,
-   "seconds": 16.4
+   "seconds": 22.2
   },
   {
    "id": "M35",
@@ -1366,7 +1372,7 @@
     }
    ],
    "killer_count": 1,
-   "seconds": 15.3
+   "seconds": 12.7
   },
   {
    "id": "M36",
@@ -1386,7 +1392,7 @@
     }
    ],
    "killer_count": 1,
-   "seconds": 15.0
+   "seconds": 13.0
   },
   {
    "id": "M37",
@@ -1406,7 +1412,27 @@
     }
    ],
    "killer_count": 1,
-   "seconds": 15.1
+   "seconds": 11.7
+  },
+  {
+   "id": "M38",
+   "area": "wire",
+   "file": "src/surplus_lab/drivers/ocpp.py",
+   "title": "Every phase of a three-phase session is reported as L1, so three phases read as one",
+   "driver": "direct",
+   "old": "                    \"phase\": f\"L{phase}\",",
+   "new": "                    \"phase\": \"L1\",",
+   "caught": true,
+   "killers": [
+    {
+     "id": "tests/test_drivers.py::test_the_station_reports_the_phases_the_way_ocpp_can_express_them",
+     "name": "test_the_station_reports_the_phases_the_way_ocpp_can_express_them",
+     "title": "Three phases are reported as three per-phase samples, and Current.Offered carries a current.",
+     "suite": "test_drivers"
+    }
+   ],
+   "killer_count": 1,
+   "seconds": 11.6
   }
  ]
 }

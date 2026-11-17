@@ -1,0 +1,158 @@
+<section class="view" id="view-wire">
+  <h2><span class="en">What goes down the wire</span><span class="ru">Что идёт по проводу</span></h2>
+  <p class="lead">
+    <span class="en"
+      >The controller's decision is one number: how many amps the cable may offer the car. Getting that number to
+      a wallbox is a protocol, and the two here could hardly be less alike. Modbus writes it into a register and
+      is answered by an echo; OCPP asks a station for permission and may be told no. Every frame on this page was
+      captured from a real socket while this page was being built — nothing is drawn by hand.</span
+    >
+    <span class="ru"
+      >Решение контроллера — одно число: сколько ампер кабель может предложить машине. Доставить это число до
+      вольтбокса — уже протокол, и два протокола здесь совсем не похожи. Modbus записывает число в регистр и
+      получает эхо; OCPP спрашивает у станции разрешения и может получить отказ. Все кадры на этой странице сняты
+      с настоящего сокета во время сборки страницы — ничего не нарисовано руками.</span
+    >
+  </p>
+
+  <h3><span class="en">One decision, two wires</span><span class="ru">Одно решение, два провода</span></h3>
+  <div class="row" id="wire-moments"></div>
+  <p class="note" id="wire-said"></p>
+  <div class="pair">
+    <div class="card">
+      <div class="eyebrow">Modbus TCP</div>
+      <h3><span class="en">A register on a home wallbox</span><span class="ru">Регистр домашнего вольтбокса</span></h3>
+      <p class="small muted">
+        <span class="en"
+          >The way evcc drives a go-e, an Easee or an Alfen: write the current into register 2000 and that is the
+          whole protocol. No session, no authorisation, nothing that will tell you your number was silly.</span
+        >
+        <span class="ru"
+          >Так evcc управляет go-e, Easee или Alfen: записать ток в регистр 2000 — вот и весь протокол. Ни сессии,
+          ни авторизации, ничего, что подскажет, что число было глупым.</span
+        >
+      </p>
+      <div id="wire-modbus"></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">OCPP 1.6J</div>
+      <h3><span class="en">A request to a charge point</span><span class="ru">Просьба к зарядной станции</span></h3>
+      <p class="small muted">
+        <span class="en"
+          >The way an operator's back office drives a public station: send a charging profile over a WebSocket and
+          wait to be told whether it was accepted. A limit here is a request, not a fact.</span
+        >
+        <span class="ru"
+          >Так облако оператора управляет публичной станцией: послать профиль зарядки по WebSocket и дождаться
+          ответа, приняли его или нет. Предел здесь — просьба, а не факт.</span
+        >
+      </p>
+      <div id="wire-ocpp"></div>
+    </div>
+  </div>
+
+  <h3><span class="en">What it reads, before it decides anything</span><span class="ru">Что он читает, прежде чем что-то решить</span></h3>
+  <p>
+    <span class="en"
+      >Both drivers answer the same two questions — what is the car taking, and what does the meter at the door
+      say — and they answer them in completely different shapes. Modbus hands over a block of registers in one
+      breath, the meter among them. OCPP has nothing at all to say about the grid meter: that is a different
+      device on a different wire, so the station is asked for the car and the meter is read separately, exactly
+      as a real installation is wired.</span
+    >
+    <span class="ru"
+      >Оба драйвера отвечают на два одинаковых вопроса — что берёт машина и что говорит счётчик на вводе — и
+      отвечают совершенно по-разному. Modbus отдаёт блок регистров одним махом, счётчик в том числе. OCPP про
+      счётчик на вводе не знает вообще ничего: это другое устройство на другом проводе, поэтому станцию
+      спрашивают про машину, а счётчик читают отдельно — ровно так, как это смонтировано в настоящем доме.</span
+    >
+  </p>
+  <div class="pair">
+    <div class="card">
+      <div class="eyebrow">Modbus TCP</div>
+      <div id="wire-read-modbus"></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">OCPP 1.6J</div>
+      <div id="wire-read-ocpp"></div>
+    </div>
+  </div>
+
+  <h3><span class="en">When the wallbox says no</span><span class="ru">Когда вольтбокс отвечает «нет»</span></h3>
+  <p>
+    <span class="en"
+      >The controller never sends either of these: not asking for impossible things is most of what it is for.
+      They are here because a wallbox that accepts nonsense is a wallbox that will charge a car at 1.6 A one day,
+      and both of these refusals have a test of their own.</span
+    >
+    <span class="ru"
+      >Контроллер не посылает ни то, ни другое: не просить невозможного — это и есть большая часть его работы. Они
+      здесь потому, что вольтбокс, который принимает чушь, однажды будет заряжать машину током 1,6 А, и у каждого
+      из этих отказов есть свой тест.</span
+    >
+  </p>
+  <div class="pair">
+    <div class="card">
+      <div class="eyebrow">Modbus TCP</div>
+      <p class="small muted">
+        <span class="en">Three amps, below the floor the pilot wire can express. Exception 3.</span>
+        <span class="ru">Три ампера — ниже того, что может выразить Control Pilot. Исключение 3.</span>
+      </p>
+      <div id="wire-no-modbus"></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">OCPP 1.6J</div>
+      <p class="small muted">
+        <span class="en">A limit in watts where the station wants amps. The station is right to refuse.</span>
+        <span class="ru">Предел в ваттах там, где станция ждёт амперы. Станция справедливо отказывает.</span>
+      </p>
+      <div id="wire-no-ocpp"></div>
+    </div>
+  </div>
+
+  <h3><span class="en">The register map</span><span class="ru">Карта регистров</span></h3>
+  <p class="small muted">
+    <span class="en"
+      >Holding registers, unit 1. Tenths of an amp rather than amps, because that is what these devices do — and
+      because it is exactly the kind of unit that gets forgotten once and then shows up as a car charging at
+      1.6 A. That is planted bug M31.</span
+    >
+    <span class="ru"
+      >Holding-регистры, устройство 1. Десятые доли ампера, а не амперы, потому что так устроены эти устройства —
+      и потому что именно такую единицу забывают один раз, а потом машина заряжается током 1,6 А. Это посаженный
+      баг M31.</span
+    >
+  </p>
+  <div id="wire-map"></div>
+
+  <h3><span class="en">And the inverter?</span><span class="ru">А инвертор?</span></h3>
+  <p>
+    <span class="en"
+      >Nothing is sent to it. A surplus controller has no business telling a roof how much sun to make: the
+      inverter produces whatever the weather allows, and the controller only ever finds out about it indirectly,
+      through the meter at the door. That is the whole reason this is a control problem rather than arithmetic —
+      the one instrument is downstream of everything, and it reports the house and the car and the roof added
+      together.</span
+    >
+    <span class="ru"
+      >Ему не передаётся ничего. Контроллеру излишка незачем указывать крыше, сколько делать солнца: инвертор
+      выдаёт столько, сколько позволяет погода, а контроллер узнаёт об этом только косвенно — через счётчик на
+      вводе. Именно поэтому это задача управления, а не арифметика: единственный прибор стоит ниже по течению и
+      показывает дом, машину и крышу, сложенные вместе.</span
+    >
+  </p>
+  <p>
+    <span class="en"
+      >Talking to an inverter is a project of its own, and it is the one next door:
+      <a href="https://github.com/NailKarimov/solar-inverter-testing">solar-inverter-testing</a> drives a 5 kW
+      inverter over Modbus RTU and TCP with the SunSpec map, including the registers that <em>do</em> limit its
+      output — a different job, with a different kind of risk.</span
+    >
+    <span class="ru"
+      >Разговор с инвертором — это отдельный проект, и он рядом:
+      <a href="https://github.com/NailKarimov/solar-inverter-testing">solar-inverter-testing</a> управляет
+      инвертором 5 кВт по Modbus RTU и TCP с картой SunSpec, включая регистры, которые как раз ограничивают его
+      выдачу, — другая задача и другие риски.</span
+    >
+  </p>
+</section>

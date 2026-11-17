@@ -142,8 +142,47 @@ for (const vector of vectors) {
   }
 }
 
+// ---- and the two encoders, against frames that really went down a socket -------------------------
+
+await import(join(here, '..', 'js', 'encode.js'));
+await import(join(here, '..', 'data', 'wire.js'));
+const Wire = globalThis.Wire;
+const recorded = globalThis.WIRE_DATA;
+let frames = 0;
+
+function amps(hex) {
+  return parseInt(hex.slice(26, 30), 16) / 10;
+}
+function phasesOf(hex) {
+  return parseInt(hex.slice(30, 34), 16);
+}
+
+for (const moment of recorded.moments) {
+  const real = moment.modbus.write.ask.hex;
+  const transaction = parseInt(real.slice(0, 4), 16);
+  const unit = parseInt(real.slice(12, 14), 16);
+  const mine = Wire.modbusWrite(amps(real), phasesOf(real), transaction, unit);
+  if (mine !== real) {
+    failures += 1;
+    console.error(`wire ${moment.id}: modbus frame differs — javascript ${mine}, python ${real}`);
+  }
+  frames += 1;
+
+  const call = moment.ocpp.find((line) => line.dir === '->');
+  const theirs = JSON.parse(call.text);
+  const ours = Wire.ocppProfile(amps(real), phasesOf(real), theirs[1]);
+  if (JSON.stringify(ours) !== JSON.stringify(theirs)) {
+    failures += 1;
+    console.error(
+      `wire ${moment.id}: ocpp message differs — javascript ${JSON.stringify(ours)}, python ${JSON.stringify(theirs)}`
+    );
+  }
+  frames += 1;
+}
+
 if (failures) {
   console.error(`twin: ${failures} differences across ${compared} turns of the loop in ${vectors.length} days`);
   process.exit(1);
 }
 console.log(`twin: ${compared} turns of the loop in ${vectors.length} days, all identical to the Python controller`);
+console.log(`wire: ${frames} frames rebuilt in JavaScript, all identical to the ones Python sent`);

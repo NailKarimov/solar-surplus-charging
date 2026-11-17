@@ -1,16 +1,16 @@
 # Test summary report — solar-surplus-charging
 
-Structure after ISO/IEC/IEEE 29119-3. Covers the run of 16 November 2026, `surplus_lab` 1.0.0.
+Structure after ISO/IEC/IEEE 29119-3. Covers the run of 17 November 2026, `surplus_lab` 1.0.0.
 
 ## 1. What was run
 
 | Pass                          | Command                 | Passed | Skipped |
 | ------------------------------- | ------------------------- | -------: | --------: |
-| Straight into the model       | `pytest`                |     90 |       0 |
-| Through a Modbus TCP wallbox  | `DRIVER=modbus pytest`  |      5 |      85 |
-| Through an OCPP charge point  | `DRIVER=ocpp pytest`    |      5 |      85 |
-| The visual page in a browser  | `pytest -m pages`       |     28 |       0 |
-| **Total**                     |                         | **128** |         |
+| Straight into the model       | `pytest`                |     91 |       0 |
+| Through a Modbus TCP wallbox  | `DRIVER=modbus pytest`  |      5 |      86 |
+| Through an OCPP charge point  | `DRIVER=ocpp pytest`    |      5 |      86 |
+| The visual page in a browser  | `pytest -m pages`       |     34 |       0 |
+| **Total**                     |                         | **135** |         |
 
 Nothing failed. The skips are the design of the matrix, not gaps: a behaviour test runs once, against the model,
 because the control law does not depend on the wire its number travels down — and that claim is itself one of the
@@ -18,12 +18,14 @@ tests, which builds all three drivers and replays a whole day through each.
 
 Beside the suite:
 
-- **Mutation check.** 37 of 37 planted bugs caught, in 306 seconds; the control run without a bug passed. The
-  table is [`mutants-result.md`](../mutants-result.md). By area: 8 in the floor and the hysteresis around it,
-  7 in the arithmetic, 7 in the two drivers, 6 in the phase switching, 5 in the timing, 4 in the fail-safe.
+- **Mutation check.** 38 of 38 planted bugs caught; the control run without a bug passed. The table is
+  [`mutants-result.md`](../mutants-result.md). By area: 8 in the floor and the hysteresis around it, 8 in the two
+  drivers, 7 in the arithmetic, 6 in the phase switching, 5 in the timing, 4 in the fail-safe.
 - **Twin check.** The JavaScript controller in the visual page made **88 560 decisions across 20 days**, eight of
   them generated at random, all identical to the Python controller's — and the three energy totals matched to
-  within a millionth of a watt-hour.
+  within a millionth of a watt-hour. The page's two frame encoders were held to the same standard: the eight
+  frames it draws were rebuilt in JavaScript and compared with the ones the Python drivers really sent, byte for
+  byte for Modbus and field for field for OCPP.
 - **Static checks.** `ruff check`, `ruff format --check` and `mypy --strict` over `src`, `tests` and `scripts`:
   clean.
 
@@ -98,6 +100,24 @@ had `grid_w()` returning `house + car − pv`, and the stepping loop computed th
 Planted bug M28 broke the first one and nothing failed. Fixed by making the loop call `grid_w()`, so there is one
 definition of what the meter at the door sees. M28 is now caught by six tests.
 
+**SS-6 — the station reported the number of phases in a field that means amps.** Severity: minor in this
+project, major in a real one. The OCPP station answered `MeterValues` with a sampled value whose `measurand` was
+`Current.Offered` — which in OCPP 1.6 is the current offered to the vehicle, in amps — and put the *number of
+phases* in it, because that was the quickest way to get the figure across; the driver read it back the same way,
+so the pair agreed with each other and every test passed. Nothing in the suite could see it, because both ends
+shared the misunderstanding.
+
+What found it was building the wire view of the visual page: the message is printed field by field there, and
+`Current.Offered: 1 A` next to a car taking 2.3 kW is wrong on sight. Fixed by reporting the offered current in
+`Current.Offered` and the phases the way OCPP can actually express them — one `Current.Import` sample per phase,
+labelled `L1` to `L3`, which the driver counts. Pinned by
+`test_the_station_reports_the_phases_the_way_ocpp_can_express_them` and by planted bug M38, which labels every
+phase `L1`.
+
+The general lesson is worth more than the defect: two ends written by the same person agree on their own private
+meaning, and a test written by the same person checks that they agree. Printing the message for a human to read
+is a different kind of check, and it cost nothing.
+
 No defect is open.
 
 ## 4. Deviations from the plan
@@ -107,7 +127,7 @@ No defect is open.
   it — and it was left out on purpose to keep one problem in view. It is the obvious next version.
 - **No hardware.** The pilot wire, the meter and the car are modelled. The pilot's duty-cycle relation is honoured
   (6 A floor, whole amps), but nothing here has been on an oscilloscope.
-- **The live page carries 7 of the 37 planted bugs.** A bug belongs on that page only if one of the live checks
+- **The live page carries 7 of the 38 planted bugs.** A bug belongs on that page only if one of the live checks
   can show it to a visitor. The ones about timing are real defects and the Python suite catches every one, but on
   a single day in a browser they are not visibly different from a controller doing its job. The page says so.
 - **Tariffs are a constant, not an input.** The ride-out budget is derived from the usual ratio between import and
@@ -116,8 +136,9 @@ No defect is open.
 ## 5. Assessment
 
 The exit criteria of the test plan are met: three green passes and a green page suite, no untranslated text in the
-page build, no difference between the twin and the Python controller across twenty days, 37 of 37 planted bugs
-caught with a passing control run, and every finding recorded with its fix.
+page build, no difference between the twin and the Python controller across twenty days or between the page's
+frames and the drivers' own, 38 of 38 planted bugs caught with a passing control run, and every finding recorded
+with its fix.
 
 What the suite is good at is the thing that matters commercially: it states the promises in the units the
 electricity bill is in, and it measures them over whole days rather than asserting that a flag was set. The

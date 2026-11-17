@@ -205,15 +205,23 @@ class ModbusDriver:
         self.unit = unit
         self.transaction = 0
         self.sock = socket.create_connection((host, port), timeout=5)
+        # When this is a list, every exchange is kept whole, both ways, exactly as it went down the
+        # wire. The visual page is built from it, so what it draws is traffic and not an artist's
+        # impression of traffic.
+        self.tape: list[dict[str, str]] | None = None
 
-    def _ask(self, pdu: bytes) -> bytes:
+    def ask(self, pdu: bytes) -> bytes:
+        """Send one PDU and return the answer's PDU, raising ModbusError if the wallbox refused."""
         self.transaction = (self.transaction + 1) % 0x10000
-        self.sock.sendall(struct.pack(">HHHB", self.transaction, 0, len(pdu) + 1, self.unit) + pdu)
+        request = struct.pack(">HHHB", self.transaction, 0, len(pdu) + 1, self.unit) + pdu
+        self.sock.sendall(request)
         header = _recv(self.sock, 7)
         if header is None or len(header) < 7:
             raise ConnectionError("the wallbox stopped answering")
         transaction, _protocol, length, _unit = struct.unpack(">HHHB", header)
         body = _recv(self.sock, length - 1) or b""
+        if self.tape is not None:
+            self.tape.append({"ask": request.hex(), "say": (header + body).hex()})
         if transaction != self.transaction:
             raise ConnectionError(f"answer {transaction} is not for question {self.transaction}")
         if body and body[0] & 0x80:
@@ -221,7 +229,7 @@ class ModbusDriver:
         return body
 
     def read(self, clock: int) -> Reading:
-        values = list(struct.unpack(">8H", self._ask(struct.pack(">BHH", READ_HOLDING, STATUS, 8))[2:]))
+        values = list(struct.unpack(">8H", self.ask(struct.pack(">BHH", READ_HOLDING, STATUS, 8))[2:]))
         status, phases, _car_da, car_high, car_low, grid_high, grid_low, age = values
         return Reading(
             clock=clock,
@@ -233,7 +241,7 @@ class ModbusDriver:
         )
 
     def apply(self, command: Command) -> None:
-        self._ask(struct.pack(">BHHBHH", WRITE_MULTIPLE, OFFER_DA, 2, 4, round(command.amps * 10), command.phases))
+        self.ask(struct.pack(">BHHBHH", WRITE_MULTIPLE, OFFER_DA, 2, 4, round(command.amps * 10), command.phases))
 
     def close(self) -> None:
         self.sock.close()

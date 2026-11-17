@@ -552,6 +552,39 @@ footer.foot {
   }
 }
 
+/* ---- two cards side by side: the same decision on two different wires ---- */
+.pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+.pair .card {
+  min-width: 0;
+}
+.pair .card > .eyebrow {
+  margin-bottom: 2px;
+}
+.pair .card > h3 {
+  margin-top: 0;
+}
+#wire-moments button .n {
+  font: 600 12px var(--font-mono);
+  color: var(--muted);
+  margin-right: 8px;
+}
+#wire-moments button[aria-pressed='true'] .n {
+  color: var(--wire);
+}
+#view-wire .hexline {
+  background: var(--sunk);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+#view-wire .part .mono {
+  font-size: 13.5px;
+}
+
 /* ---- tour: one day in seven moments ---- */
 .story {
   display: grid;

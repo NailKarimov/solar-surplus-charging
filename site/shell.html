@@ -37,15 +37,17 @@
       <nav class="wrap tabs" aria-label="Views">
         <a href="#tour" data-view="tour"><span class="n">1</span><span class="en">In two minutes</span><span class="ru">За две минуты</span></a>
         <a href="#live" data-view="live"><span class="n">2</span><span class="en">Live house</span><span class="ru">Живой дом</span></a>
-        <a href="#day" data-view="day"><span class="n">3</span><span class="en">A whole day</span><span class="ru">Целый день</span></a>
-        <a href="#replay" data-view="replay"><span class="n">4</span><span class="en">Last test run</span><span class="ru">Последний прогон</span></a>
-        <a href="#bugs" data-view="bugs"><span class="n">5</span><span class="en">Bug hunt</span><span class="ru">Охота на баги</span></a>
+        <a href="#wire" data-view="wire"><span class="n">3</span><span class="en">On the wire</span><span class="ru">По проводу</span></a>
+        <a href="#day" data-view="day"><span class="n">4</span><span class="en">A whole day</span><span class="ru">Целый день</span></a>
+        <a href="#replay" data-view="replay"><span class="n">5</span><span class="en">Last test run</span><span class="ru">Последний прогон</span></a>
+        <a href="#bugs" data-view="bugs"><span class="n">6</span><span class="en">Bug hunt</span><span class="ru">Охота на баги</span></a>
       </nav>
     </div>
 
     <main class="wrap">
       <!-- include: views/tour.html -->
       <!-- include: views/live.html -->
+      <!-- include: views/wire.html -->
       <!-- include: views/day.html -->
       <!-- include: views/replay.html -->
       <!-- include: views/bugs.html -->
@@ -68,20 +70,23 @@
     <!-- include: data/run.js -->
     <!-- include: data/mutants.js -->
     <!-- include: data/days.js -->
+    <!-- include: data/wire.js -->
     <!-- include: data/ru.js -->
     <!-- include: js/twin.js -->
     <!-- include: js/core.js -->
+    <!-- include: js/encode.js -->
     <!-- include: js/scene.js -->
     <!-- include: js/chart.js -->
     <!-- include: js/tour.js -->
     <!-- include: js/live.js -->
+    <!-- include: js/wire.js -->
     <!-- include: js/day.js -->
     <!-- include: js/replay.js -->
     <!-- include: js/bugs.js -->
     <script>
       (function () {
         var App = window.App;
-        var VIEWS = ['tour', 'live', 'day', 'replay', 'bugs'];
+        var VIEWS = ['tour', 'live', 'wire', 'day', 'replay', 'bugs'];
         var current = null;
 
         function show(name) {

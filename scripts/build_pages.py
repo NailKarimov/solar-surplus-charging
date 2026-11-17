@@ -18,6 +18,9 @@ from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from wire import record as record_wire  # noqa: E402
 
 from surplus_lab import __version__  # noqa: E402
 from surplus_lab.control import Controller, Settings  # noqa: E402
@@ -354,6 +357,7 @@ def main(argv: list[str]) -> int:
     (SITE / "data" / "run.js").write_text(js("RUN_DATA", run) + "\n")
     (SITE / "data" / "mutants.js").write_text(js("MUTANT_DATA", mutants) + "\n")
     (SITE / "data" / "days.js").write_text(js("DAY_DATA", days) + "\n")
+    (SITE / "data" / "wire.js").write_text(js("WIRE_DATA", record_wire()) + "\n")
     ru = json.loads((SITE / "i18n" / "ru.json").read_text())
     (SITE / "data" / "ru.js").write_text(js("RU_DATA", ru) + "\n")
 

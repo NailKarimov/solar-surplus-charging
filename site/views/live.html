@@ -53,6 +53,25 @@
       </div>
 
       <div class="card" style="margin-top: 12px">
+        <h3><span class="en">What went down the wire</span><span class="ru">Что ушло по проводу</span></h3>
+        <p class="small muted">
+          <span class="en"
+            >The same decision, as each of the two drivers carries it: a register written into a home wallbox, and
+            a profile sent to a charge point that may refuse it. These are rebuilt here by the page, and checked
+            against the frames the Python drivers really sent. The byte-by-byte version, with the answers and the
+            readings, is in <a href="#wire">On the wire</a>.</span
+          >
+          <span class="ru"
+            >То же решение в исполнении каждого из двух драйверов: регистр, записанный в домашний вольтбокс, и
+            профиль, посланный станции, которая может и отказать. Страница собирает их сама, и они сверены с
+            кадрами, которые действительно отправляли драйверы на Python. Разбор по байтам, с ответами и
+            чтениями, — в разделе <a href="#wire">«По проводу»</a>.</span
+          >
+        </p>
+        <div id="live-wire"></div>
+      </div>
+
+      <div class="card" style="margin-top: 12px">
         <h3><span class="en">Plant a bug</span><span class="ru">Посадить баг</span></h3>
         <p class="small muted">
           <span class="en"
@@ -116,6 +135,7 @@
         <div class="ctl" style="margin-top: 10px">
           <label><span class="en">How fast time runs</span><span class="ru">Как быстро идёт время</span></label>
           <div class="row" id="live-speed"></div>
+          <p class="small muted" id="live-pace" style="margin-top: 6px"></p>
         </div>
       </div>
 

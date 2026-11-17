@@ -9,6 +9,7 @@ replayed through all three drivers and compared command for command.
 
 from __future__ import annotations
 
+import json
 import socket as socket_module
 import struct
 import threading
@@ -218,6 +219,52 @@ def test_the_station_sends_a_reading_when_the_back_office_asks_for_one() -> None
     finally:
         station.close()
         back_office.close()
+
+
+@pytest.mark.once
+def test_the_station_reports_the_phases_the_way_ocpp_can_express_them() -> None:
+    """Three phases are reported as three per-phase samples, and Current.Offered carries a current."""
+    house = DAYS["clear"]()
+    house.phases = 3
+    back_office = OcppDriver(house)
+    station = Station(house, back_office.url)
+    try:
+        house.offer(10.0, 3)
+        house.advance(120)
+        tape: list[dict[str, str]] = []
+        back_office.tape = tape
+        with step("the back office asks a three-phase station for a reading"):
+            reading = back_office.read(house.clock)
+            note("the station reported", f"{reading.phases} phase(s)")
+            assert reading.phases == 3
+
+        values = _meter_samples(tape)
+        offered = [sample for sample in values if sample["measurand"] == "Current.Offered"]
+        per_phase = [sample for sample in values if sample["measurand"] == "Current.Import"]
+        with step("Current.Offered is a current, not a count of phases"):
+            note("Current.Offered", f"{offered[0]['value']} {offered[0]['unit']}")
+            assert float(offered[0]["value"]) == pytest.approx(10.0)
+        with step("one sample per phase, labelled L1 to L3"):
+            note("per-phase samples", ", ".join(sample["phase"] for sample in per_phase))
+            assert [sample["phase"] for sample in per_phase] == ["L1", "L2", "L3"]
+
+        house.offer(10.0, 1)
+        house.advance(10)
+        with step("and one phase is reported as one"):
+            assert back_office.read(house.clock).phases == 1
+    finally:
+        station.close()
+        back_office.close()
+
+
+def _meter_samples(tape: list[dict[str, str]]) -> list[dict[str, str]]:
+    """The sampled values out of the MeterValues message the station sent."""
+    for entry in tape:
+        frame = json.loads(entry["text"])
+        if frame[0] == 2 and frame[2] == "MeterValues":
+            samples: list[dict[str, str]] = frame[3]["meterValue"][0]["sampledValue"]
+            return samples
+    raise AssertionError("the station sent no MeterValues")
 
 
 # ---- the three of them together --------------------------------------------------------------------

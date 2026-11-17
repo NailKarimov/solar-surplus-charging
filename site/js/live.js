@@ -11,7 +11,13 @@
 
   var scene, house, controller, timer;
   var active = false;
+  /* How many simulated seconds pass for each real second. The clock below is paced against the
+     browser's own clock rather than its frame rate: a loop that ticks N times per frame runs at
+     whatever speed the machine happens to draw at, and at a thousand times real time nothing on the
+     screen can be followed — the whole point of this controller is *when* it acts. */
   var speed = 10;
+  var carry = 0;
+  var lastTs = 0;
   var sun = 1.0;
   var bug = null;
   var allowSwitching = true;
@@ -259,6 +265,101 @@
     document.getElementById('live-energy').textContent = App.kwh(house.totals.car_wh);
     var why = App.clear(document.getElementById('live-why'));
     why.appendChild(document.createTextNode(App.whyWords(controller._lastWhy || '')));
+    paintWire();
+  }
+
+  /* What the last decision looks like on each of the two wires. Rebuilt by `js/encode.js`, which the
+     twin check holds against the frames the Python drivers really sent. */
+  var wireSeen = null;
+  var wireNo = 0;
+
+  function hexline(hex) {
+    var cuts = [
+      [0, 12, 'mbap'],
+      [12, 14, 'unit'],
+      [14, 16, 'fn'],
+      [16, 20, 'addr'],
+      [20, 24, 'count'],
+      [24, 26, 'count'],
+      [26, 30, 'data'],
+      [30, 34, 'data'],
+    ];
+    var line = h('div', { class: 'hexline' });
+    cuts.forEach(function (cut, index) {
+      if (index) line.appendChild(document.createTextNode(' '));
+      line.appendChild(h('i', { class: cut[2] }, hex.slice(cut[0], cut[1])));
+    });
+    return line;
+  }
+
+  function paintWire() {
+    var box = document.getElementById('live-wire');
+    if (!box || !window.Wire) return;
+    var command = house.offered_a + '|' + house.phases;
+    var key = command + '|' + App.lang;
+    if (key === wireSeen) return;
+    if (wireSeen === null || command !== wireSeen.slice(0, wireSeen.lastIndexOf('|'))) {
+      wireNo += 1; // a new message only when the decision itself changed, not when the page redraws
+    }
+    wireSeen = key;
+    App.clear(box);
+
+    var amps = house.offered_a;
+    var hex = window.Wire.modbusWrite(amps, house.phases, wireNo % 0x10000, 1);
+    box.appendChild(h('div', { class: 'eyebrow' }, 'Modbus TCP'));
+    box.appendChild(hexline(hex));
+    box.appendChild(
+      h(
+        'div',
+        { class: 'small muted' },
+        App.both(
+          'write ' +
+            Math.round(amps * 10) +
+            ' into register ' +
+            window.Wire.OFFER_DA +
+            (amps ? ': ' + amps.toFixed(1) + ' A per phase, on ' : ': pause, on ') +
+            (house.phases === 1 ? 'one phase' : 'three phases'),
+          'записать ' +
+            Math.round(amps * 10) +
+            ' в регистр ' +
+            window.Wire.OFFER_DA +
+            (amps ? ': ' + amps.toFixed(1).replace('.', ',') + ' А на фазу, на ' : ': пауза, на ') +
+            (house.phases === 1 ? 'одной фазе' : 'трёх фазах')
+        )
+      )
+    );
+
+    var call = window.Wire.ocppProfile(amps, house.phases, wireNo);
+    box.appendChild(h('div', { class: 'eyebrow', style: 'margin-top:12px' }, 'OCPP 1.6J'));
+    box.appendChild(
+      h('div', { class: 'wire' }, [
+        h('i', { class: 'kind' }, 'CALL'),
+        ' ',
+        h('i', { class: 'mid' }, '#' + call[1]),
+        ' ',
+        h('i', { class: 'act' }, call[2]),
+        ' ',
+        h('i', { class: 'body' }, JSON.stringify(call[3])),
+      ])
+    );
+    var period = call[3].csChargingProfiles.chargingSchedule.chargingSchedulePeriod[0];
+    box.appendChild(
+      h(
+        'div',
+        { class: 'small muted' },
+        App.both(
+          period.limit
+            ? 'the limit: ' + period.limit.toFixed(1) + ' A on ' + (period.numberPhases === 1 ? 'one phase' : 'three phases')
+            : 'the limit: 0 A — which is how OCPP says stop',
+          period.limit
+            ? 'предел: ' +
+              period.limit.toFixed(1).replace('.', ',') +
+              ' А на ' +
+              (period.numberPhases === 1 ? 'одной фазе' : 'трёх фазах')
+            : 'предел: 0 А — так OCPP говорит «стоп»'
+        )
+      )
+    );
   }
 
   function paintChecks() {
@@ -314,6 +415,7 @@
       [1, '×1'],
       [10, '×10'],
       [60, '×60'],
+      [300, '×300'],
     ].forEach(function (row) {
       speeds.appendChild(
         h(
@@ -324,6 +426,8 @@
             'aria-pressed': String(speed === row[0]),
             onclick: function () {
               speed = row[0];
+              carry = 0;
+              lastTs = 0;
               paintControls();
             },
           },
@@ -331,9 +435,44 @@
         )
       );
     });
+    var pace = App.clear(document.getElementById('live-pace'));
+    pace.appendChild(
+      App.both(
+        speed === 0
+          ? 'Time is stopped. The house keeps whatever state it is in.'
+          : 'One real second is ' +
+            (speed === 1 ? 'one second' : App.num(speed) + ' seconds') +
+            ' in the house. The controller decides every ' +
+            (speed <= 1 ? 'second' : '10 seconds') +
+            ', which is the cadence the tests use. A whole day at this speed takes ' +
+            paceWords(14 * 3600 / speed) +
+            '.',
+        speed === 0
+          ? 'Время остановлено. Дом остаётся в том состоянии, в котором был.'
+          : 'Одна реальная секунда — это ' +
+            (speed === 1 ? 'одна секунда' : App.num(speed) + ' секунд') +
+            ' в доме. Контроллер решает раз в ' +
+            (speed <= 1 ? 'секунду' : '10 секунд') +
+            ' — с тем же шагом, что и в тестах. Целый день при такой скорости займёт ' +
+            paceWordsRu(14 * 3600 / speed) +
+            '.'
+      )
+    );
     document.getElementById('live-plug').setAttribute('aria-pressed', String(house.car.plugged));
     document.getElementById('live-switching').setAttribute('aria-pressed', String(allowSwitching));
     document.getElementById('live-meter').setAttribute('aria-pressed', String(house.meter.silent));
+  }
+
+  function paceWords(seconds) {
+    if (seconds < 90) return App.num(Math.round(seconds)) + ' seconds';
+    if (seconds < 5400) return App.num(Math.round(seconds / 60)) + ' minutes';
+    return App.num(seconds / 3600, 1) + ' hours';
+  }
+
+  function paceWordsRu(seconds) {
+    if (seconds < 90) return App.num(Math.round(seconds)) + ' с';
+    if (seconds < 5400) return App.num(Math.round(seconds / 60)) + ' мин';
+    return App.num(seconds / 3600, 1) + ' ч';
   }
 
   function toggleLoad(load) {
@@ -380,13 +519,24 @@
       });
   }
 
-  function frame() {
+  function frame(ts) {
     if (!active) return;
     if (speed) {
-      var steps = speed <= 1 ? 1 : speed <= 10 ? 2 : 10;
-      for (var n = 0; n < steps; n++) tick(speed <= 1 ? 1 : 10);
+      if (!lastTs) lastTs = ts;
+      var elapsed = Math.min(0.25, (ts - lastTs) / 1000); // a tab that was away does not fast-forward
+      lastTs = ts;
+      carry += elapsed * speed;
+      var step = speed <= 1 ? 1 : 10;
+      var guard = 0;
+      while (carry >= step && guard < 600) {
+        carry -= step;
+        tick(step);
+        guard += 1;
+      }
       paintState();
       paintChecks();
+    } else {
+      lastTs = 0;
     }
     timer = window.requestAnimationFrame(frame);
   }
@@ -431,6 +581,7 @@
       paintState();
       paintChecks();
       App.onLang(function () {
+        wireSeen = null;
         bugList();
         paintControls();
         paintState();
@@ -439,6 +590,8 @@
     },
     show: function () {
       active = true;
+      carry = 0;
+      lastTs = 0;
       timer = window.requestAnimationFrame(frame);
     },
     hide: function () {

@@ -1,7 +1,7 @@
 # A guide to this project
 
 What the problem actually is, how the controller solves it, why three reasonable goals cannot all be met at
-once, and what the five views of the visual page show. Written for a reader who has never thought about
+once, and what the six views of the visual page show. Written for a reader who has never thought about
 electricity meters.
 
 The same material, with pictures and a house you can operate yourself, is at
@@ -151,11 +151,11 @@ Both are computed in `house.py` from the energy that actually moved, second by s
 ## 10. How good are the tests?
 
 A green suite says nothing about whether the tests would notice a real defect. `scripts/mutants.py` answers that
-directly: it plants **37 bugs**, one at a time, in the source, runs the suite, and records which tests went red.
+directly: it plants **38 bugs**, one at a time, in the source, runs the suite, and records which tests went red.
 
 The bugs are the ones a person would actually write: the meter's sign the wrong way round, amps rounded to the
 nearest instead of down, the three phases forgotten in a division, the offer coming down as slowly as it goes up,
-a register read as amps when it holds tenths of an amp. The current result is **37 of 37 caught**, with a control
+a register read as amps when it holds tenths of an amp. The current result is **38 of 38 caught**, with a control
 run that plants nothing and passes.
 
 Two of those bugs did not start out caught, and neither was a missing test: one of them could not be caught at
@@ -164,15 +164,16 @@ finding SS-4, and it is the best argument for mutation testing there is.
 
 ## 11. The visual page
 
-`docs/surplus-charging.html` is one self-contained file with five views, in English and Russian.
+`docs/surplus-charging.html` is one self-contained file with six views, in English and Russian.
 
 | View | What you can do |
 | --- | --- |
 | **What this is, in two minutes** | one day stopped at seven moments — first light, the sun arriving, a cloud, the two-minute wait after it, the oven, a shadow deep enough to stop for, and the evening — each played slowly enough to follow, each with a caption saying what the house did and what the controller did about it |
-| **The live house** | move the sun, send a cloud, put the kettle on, unplug the car, cut the meter, and **plant a bug** |
+| **The live house** | move the sun, send a cloud, put the kettle on, unplug the car, cut the meter, and **plant a bug**; time runs at the speed the buttons say, from one second a second to three hundred |
+| **On the wire** | the same decision as a Modbus register written into a home wallbox and as an OCPP profile sent to a charge point — every byte labelled, with the answers, the readings and the two refusals |
 | **A whole day** | the chart: what the roof made, what the car took, and the grid line on zero, for seven different days |
 | **Last test run** | every check as one sentence; open one and see its steps and the watt-hours it measured |
-| **Bug hunt** | all 37 planted bugs, the line each one changed, and the tests that caught it |
+| **Bug hunt** | all 38 planted bugs, the line each one changed, and the tests that caught it |
 
 The tour does not race. An earlier version played a whole day in a few seconds, and everything on the screen
 merely twitched: the point of a controller is *when* it acts, and at seven thousand times real time there is no
@@ -180,6 +181,13 @@ when. It now stops at the seven moments where a decision is actually made, runs 
 times real time, and prints the controller's own reason for what it just did. The captions were written against
 measured runs, not from memory, and three of the browser tests play those moments through and check that the
 offer really falls under the cloud and that the deep shadow really spends the ride-out budget and lets go.
+
+The wire view does not draw frames either. `scripts/wire.py` runs a whole day down a real TCP socket to a real
+Modbus wallbox, picks out the four writes where something changed, and labels every byte of them; the OCPP
+messages come from a real WebSocket to a real charge point. The live house rebuilds the same two frames in
+JavaScript as you operate it, and the twin check holds that JavaScript against the frames Python sent — byte for
+byte for Modbus, field for field for OCPP. Building that view is also what turned up finding SS-6: the station
+had been reporting the number of phases in a sample labelled `Current.Offered`, which means amps.
 
 Two things keep the page honest. The days on the chart are produced by running the real controller against the
 real model — the page cannot show a day that did not happen. And the live house is a **JavaScript twin** of the
@@ -196,6 +204,7 @@ src/surplus_lab/day.py             the seven named days and the four-line loop t
 src/surplus_lab/drivers/direct.py  no protocol: the reference
 src/surplus_lab/drivers/modbus.py  the register map, the MBAP framing and the exceptions
 src/surplus_lab/drivers/ocpp.py    the OCPP-J exchange, and why the grid meter is not part of it
+scripts/wire.py                    real frames off a real socket, labelled byte by byte for the page
 ```
 
 ---
@@ -204,6 +213,8 @@ src/surplus_lab/drivers/ocpp.py    the OCPP-J exchange, and why the grid meter i
 
 [![The live house, where you can send a cloud over, put the kettle on and plant a bug](img/live.png)](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html#live)
 
+[![One decision, as a Modbus register and as an OCPP profile, byte by byte](img/wire.png)](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html#wire)
+
 [![The last test run, every check as one sentence with the watt-hours it measured](img/replay.png)](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html#replay)
 
-[![The bug hunt: 37 planted bugs and the checks that caught each](img/bugs.png)](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html#bugs)
+[![The bug hunt: 38 planted bugs and the checks that caught each](img/bugs.png)](https://nailkarimov.github.io/solar-surplus-charging/surplus-charging.html#bugs)
